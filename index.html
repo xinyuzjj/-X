@@ -1,286 +1,448 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALPHA CORE | 交易系统执行手册</title>
+    <title>峻峻尼-X 终极完整版 | Junjunni-X Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        mono: ['"JetBrains Mono"', 'monospace'],
                         sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        bg: '#0b0e11',      /* 币安黑 */
-                        card: '#181a20',    /* 卡片深灰 */
-                        primary: '#FCD535', /* 币安黄 */
-                        up: '#0ECB81',      /* 涨势绿 */
-                        down: '#F6465D',    /* 跌势红 */
-                        text: '#EAECEF',    /* 亮白字 */
-                        sub: '#848E9C',     /* 灰色字 */
-                        border: '#2B3139'   /* 边框色 */
+                        bg: '#030303',       /* 纯黑背景 */
+                        panel: '#0e0e10',    /* 面板黑 */
+                        border: '#27272a',   /* 边框灰 */
+                        text: '#e4e4e7',     /* 主文本 */
+                        muted: '#a1a1aa',    /* 弱文本 */
+                        gold: '#FFD700',     /* 重点/SMC */
+                        cyan: '#00F0FF',     /* ICT/流动性 */
+                        up: '#00E396',       /* 涨/BOS */
+                        down: '#FF0040',     /* 跌/SSL */
+                        purple: '#9D00FF'    /* 结构破坏 */
                     },
                     boxShadow: {
-                        'neon-up': '0 0 10px rgba(14, 203, 129, 0.2)',
-                        'neon-down': '0 0 10px rgba(246, 70, 93, 0.2)',
+                        'neon-gold': '0 0 20px rgba(255, 215, 0, 0.1)',
+                        'neon-cyan': '0 0 20px rgba(0, 240, 255, 0.1)',
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #0b0e11; color: #EAECEF; }
-        .glass-panel {
-            background: rgba(24, 26, 32, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid #2B3139;
-            transition: all 0.3s ease;
-        }
-        .glass-panel:hover {
-            border-color: #474D57;
-            transform: translateY(-2px);
-        }
-        .step-num {
-            font-family: 'JetBrains Mono';
-            position: absolute;
-            top: -20px;
-            right: 10px;
-            font-size: 5rem;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.03);
-            pointer-events: none;
-        }
-        /* 自定义滚动条 */
+        body { background-color: #030303; color: #e4e4e7; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0e11; }
-        ::-webkit-scrollbar-thumb { background: #2B3139; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #474D57; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        /* 样式组件 */
+        .original-box { 
+            border-left: 3px solid #FFD700; 
+            background: linear-gradient(90deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 100%);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .ict-box {
+            border-left: 3px solid #00F0FF;
+            background: linear-gradient(90deg, rgba(0,240,255,0.05) 0%, rgba(0,0,0,0) 100%);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title span { color: #FFD700; margin-right: 1rem; font-family: 'JetBrains Mono'; opacity: 0.5; }
     </style>
 </head>
-<body class="antialiased min-h-screen font-sans selection:bg-primary selection:text-black">
+<body class="antialiased selection:bg-gold selection:text-black">
 
-    <nav class="fixed w-full z-50 top-0 border-b border-border bg-bg/90 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                    <span class="font-mono font-bold text-xl tracking-tighter">ALPHA<span class="text-primary">CORE</span>_SYS</span>
-                </div>
-                <div class="flex space-x-4 text-xs font-mono text-sub">
-                    <span class="border border-border px-2 py-1 rounded bg-card">UTC+8 <span id="clock">Loading...</span></span>
-                    <span class="border border-green-900/50 px-2 py-1 rounded bg-green-900/20 text-up">SYSTEM: ONLINE</span>
-                </div>
+    <div class="flex min-h-screen max-w-[1920px] mx-auto">
+
+        <aside class="hidden xl:block w-72 fixed h-screen top-0 left-0 border-r border-border bg-bg p-8 overflow-y-auto z-20">
+            <div class="mb-10">
+                <div class="text-xs font-mono text-cyan mb-2">/// SYSTEM: COMPLETE</div>
+                <h1 class="font-black text-3xl text-white tracking-tighter">峻峻尼-X 终极完整版<span class="text-gold">-X</span></h1>
+                <p class="text-muted text-xs mt-2 font-mono">Institutional Protocol</p>
             </div>
-        </div>
-    </nav>
+            
+            <nav class="space-y-6 font-mono text-sm font-medium">
+                <div>
+                    <div class="text-cyan text-xs uppercase mb-3 font-bold opacity-80 border-b border-border pb-1">核心模型 (Core)</div>
+                    <a href="#ict-amd" class="block py-1.5 text-muted hover:text-white transition">00. PO3 (AMD) 模型</a>
+                    <a href="#liquidity" class="block py-1.5 text-muted hover:text-white transition">00. 流动性结构</a>
+                    <a href="#structure-map" class="block py-1.5 text-muted hover:text-white transition">00. 市场结构生成图</a>
+                </div>
+                <div>
+                    <div class="text-gold text-xs uppercase mb-3 font-bold opacity-80 border-b border-border pb-1">执行步骤 (Execution)</div>
+                    <a href="#step1" class="block py-1.5 text-muted hover:text-white transition">01. K线 (OB & SFP)</a>
+                    <a href="#step2" class="block py-1.5 text-muted hover:text-white transition">02. 关键时间 & 价格</a>
+                    <a href="#step3" class="block py-1.5 text-muted hover:text-white transition">03. 市场结构法则</a>
+                    <a href="#step4" class="block py-1.5 text-muted hover:text-white transition">04. 关键区间 (POI)</a>
+                    <a href="#step5" class="block py-1.5 text-muted hover:text-white transition">05/06. 进场与风控</a>
+                    <a href="#step7" class="block py-1.5 text-muted hover:text-white transition">07. 斐波那契回测</a>
+                    <a href="#step8" class="block py-1.5 text-muted hover:text-white transition">08. 成交量</a>
+                </div>
+            </nav>
+        </aside>
 
-    <main class="pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="hidden xl:block w-72 flex-shrink-0"></div>
 
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-                SMC <span class="text-sub font-light">&</span> PRICE ACTION
-            </h1>
-            <p class="text-sub max-w-2xl mx-auto font-mono text-sm">
-                /// 执行标准：寻找流动性掠夺后的结构破坏，在 OTE 区域利用 OB 确认入场。
-            </p>
-        </div>
+        <main class="flex-1 p-6 md:p-16">
+            
+            <section class="mb-24 pt-10 border-b border-border pb-12">
+                <h1 class="text-5xl md:text-8xl font-black mb-6 tracking-tighter text-white">
+                    JUNJUNNI <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-600">-X</span>
+                </h1>
+                <p class="text-xl text-muted max-w-3xl leading-relaxed">
+                    深度融合 <span class="text-white font-bold">价格行为 (Price Action)</span> 与 <span class="text-cyan font-bold">聪明钱 (SMC)</span> 概念。<br>
+                    核心逻辑：在震荡积累后，识别<span class="text-down">流动性猎杀</span>，捕捉<span class="text-up">机构订单流</span>的爆发。
+                </p>
+            </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
-                <div class="step-num">01</div>
-                <div class="h-1 w-10 bg-primary mb-4"></div>
-                <h3 class="text-lg font-bold mb-2">读懂 K 线结构</h3>
-                <p class="text-xs text-sub mb-3 font-mono">PATTERN RECOGNITION</p>
-                <ul class="text-sm space-y-2 text-gray-300">
-                    <li class="flex items-start"><span class="text-up mr-2">▸</span><span>**吞噬形态 (Engulfing)**：最强反转信号</span></li>
-                    <li class="flex items-start"><span class="text-up mr-2">▸</span><span>**OB 定义**：吞噬 + 随后连续三根同向 K 线 (Momentum)</span></li>
-                    <li class="flex items-start"><span class="text-sub mr-2">▸</span><span>辅助：黄昏之星 / 希望之星</span></li>
-                </ul>
-            </div>
-
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
-                <div class="step-num">02</div>
-                <div class="h-1 w-10 bg-blue-500 mb-4"></div>
-                <h3 class="text-lg font-bold mb-2">关键时间 & 开盘价</h3>
-                <p class="text-xs text-sub mb-3 font-mono">TIME & PRICE</p>
-                <div class="space-y-3 text-sm">
-                    <div class="bg-card p-2 rounded border border-border">
-                        <span class="text-primary font-bold">纽约盘 21:30</span>
-                        <div class="text-xs text-sub mt-1">核心波动源，新闻发布</div>
+            <section id="ict-amd" class="mb-32 scroll-mt-20">
+                <div class="section-title"><span>MDL</span> PO3 (AMD) 宏观模型</div>
+                
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div>
+                        <div class="ict-box">
+                            <h3 class="text-cyan font-bold mb-2">PO3 核心逻辑：</h3>
+                            <p class="text-muted leading-relaxed">
+                                PO3 (Power of 3) 一般发生在<strong class="text-white">震荡结束之后</strong>。<br>
+                                趋势不会直接启动，它通常包含三个阶段：<br>
+                                1. <strong class="text-white">积累 (Accumulation)</strong>: 震荡吸筹。<br>
+                                2. <strong class="text-down">操纵 (Manipulation)</strong>: 假突破/猎杀止损。<br>
+                                3. <strong class="text-up">派发 (Distribution)</strong>: 真实趋势释放。
+                            </p>
+                        </div>
                     </div>
-                    <ul class="space-y-1 text-gray-300">
-                        <li>• <span class="text-white font-bold">周开 (WO)</span>: 定周线基调</li>
-                        <li>• <span class="text-white font-bold">日开 (DO)</span>: 日内分水岭</li>
-                        <li>• <span class="text-white font-bold">4H 开</span>: 配合15m入场</li>
+                    
+                    <div class="bg-panel border border-border rounded-xl p-6 flex justify-center items-center relative hover:border-cyan transition">
+                        <div class="absolute top-3 left-4 text-xs font-mono text-cyan">CHART: AMD_CYCLE</div>
+                        <svg width="500" height="250" viewBox="0 0 500 250">
+                            <rect x="50" y="100" width="140" height="50" fill="none" stroke="#666" stroke-dasharray="4"/>
+                            <text x="120" y="90" fill="#888" font-size="12" text-anchor="middle" font-weight="bold">积累 (震荡区)</text>
+                            
+                            <path d="M 190 150 L 210 210 L 240 170" fill="none" stroke="#FF0040" stroke-width="2"/>
+                            <circle cx="210" cy="210" r="6" fill="#FF0040"/>
+                            <text x="210" y="235" fill="#FF0040" font-size="12" text-anchor="middle" font-weight="bold">操纵 (猎杀)</text>
+                            
+                            <path d="M 240 170 L 300 60 L 350 80 L 450 10" fill="none" stroke="#00E396" stroke-width="3"/>
+                            <text x="350" y="50" fill="#00E396" font-size="14" text-anchor="middle" font-weight="bold">派发 (趋势)</text>
+                            
+                            <line x1="50" y1="150" x2="450" y2="150" stroke="#333" stroke-width="1"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <section id="liquidity" class="mb-32 scroll-mt-20">
+                <div class="section-title"><span>LIQ</span> 流动性结构 (BSL/SSL)</div>
+                
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div>
+                        <div class="original-box">
+                            <h3 class="text-gold font-bold mb-2">原文核心：</h3>
+                            <p class="text-white">
+                                “价格移动是向着流动性的方向移动，拿去买卖双方的流动性是庄家不断插针的原因。”
+                            </p>
+                        </div>
+                        <div class="ict-box">
+                            <h3 class="text-cyan font-bold mb-2">深度解析：</h3>
+                            <ul class="text-sm text-muted space-y-3">
+                                <li>
+                                    <strong class="text-white">BSL (买方流动性)</strong>: 位于旧高点上方。这里有空头的止损买单。价格冲破这里是为了获取买盘。
+                                </li>
+                                <li>
+                                    <strong class="text-white">SSL (卖方流动性)</strong>: 位于旧低点下方。这里有多头的止损卖单。
+                                </li>
+                                <li class="text-cyan italic">“诱导”的本质就是让散户以为突破了，实则是去扫止损。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-panel border border-border rounded-xl p-6 flex justify-center items-center relative hover:border-gold transition">
+                        <div class="absolute top-3 left-4 text-xs font-mono text-gold">CHART: LIQUIDITY_SWEEP</div>
+                        <svg width="450" height="250" viewBox="0 0 450 250">
+                            <line x1="50" y1="60" x2="400" y2="60" stroke="#FF0040" stroke-dasharray="4"/>
+                            <text x="380" y="50" fill="#FF0040" font-size="12" font-weight="bold">BSL</text>
+                            
+                            <line x1="50" y1="200" x2="400" y2="200" stroke="#00E396" stroke-dasharray="4"/>
+                            <text x="380" y="220" fill="#00E396" font-size="12" font-weight="bold">SSL</text>
+                            
+                            <path d="M 50 130 L 100 80 L 150 180 L 200 90 L 250 160 L 300 40 L 350 120 L 420 230" 
+                                  fill="none" stroke="#e4e4e7" stroke-width="2"/>
+                            
+                            <circle cx="300" cy="40" r="8" fill="none" stroke="#FFD700" stroke-width="2"/>
+                            <text x="240" y="30" fill="#FFD700" font-weight="bold">猎杀 (Sweep)</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <section id="structure-map" class="mb-32 scroll-mt-20">
+                <div class="section-title"><span>MAP</span> 市场结构生成图</div>
+                
+                <div class="bg-panel border border-border rounded-xl p-8 relative overflow-hidden shadow-neon-cyan">
+                    <div class="absolute top-4 left-4 text-xs font-mono text-purple">FULL CYCLE: BOS & CHoCH</div>
+                    <p class="text-center text-muted mb-8 text-sm">此图展示了从<span class="text-up">结构延续 (BOS)</span> 到 <span class="text-purple">结构破坏 (CHoCH)</span> 的完整过程。</p>
+                    
+                    <svg width="800" height="300" viewBox="0 0 800 300" class="w-full h-auto">
+                        <path d="M 50 250 L 150 150 L 200 200 L 300 100 L 350 150 L 450 50" 
+                              fill="none" stroke="#00E396" stroke-width="3"/>
+                        
+                        <line x1="150" y1="150" x2="330" y2="150" stroke="#00E396" stroke-dasharray="2" opacity="0.5"/>
+                        <text x="220" y="140" fill="#00E396" font-size="12" font-weight="bold">BOS (延续)</text>
+                        
+                        <line x1="300" y1="100" x2="480" y2="100" stroke="#00E396" stroke-dasharray="2" opacity="0.5"/>
+                        <text x="380" y="90" fill="#00E396" font-size="12" font-weight="bold">BOS (延续)</text>
+                        
+                        <circle cx="350" cy="150" r="5" fill="#fff"/>
+                        <text x="360" y="170" fill="#fff" font-size="12">关键 HL</text>
+
+                        <path d="M 450 50 L 500 100 L 550 40 L 600 200" 
+                              fill="none" stroke="#FF0040" stroke-width="3"/>
+                        <circle cx="550" cy="40" r="6" fill="none" stroke="#gold" stroke-width="2"/>
+                        <text x="560" y="30" fill="#gold" font-size="12">SFP (猎杀前高)</text>
+
+                        <line x1="350" y1="150" x2="650" y2="150" stroke="#9D00FF" stroke-width="2" stroke-dasharray="4"/>
+                        <circle cx="585" cy="150" r="6" fill="#9D00FF"/>
+                        <text x="620" y="140" fill="#9D00FF" font-size="14" font-weight="bold">CHoCH (改变)</text>
+
+                        <path d="M 600 200 L 650 120 L 750 300" fill="none" stroke="#FF0040" stroke-width="3"/>
+                        <rect x="630" y="100" width="40" height="30" fill="#9D00FF" fill-opacity="0.2"/>
+                        <text x="680" y="110" fill="#9D00FF" font-size="12">回测 OB</text>
+                    </svg>
+                </div>
+            </section>
+
+            <section id="step1" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>01</span> 读懂 K 线：OB 与形态</div>
+                
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div class="space-y-6">
+                        <div class="original-box">
+                            <h3 class="text-gold font-bold mb-3">原文法则：</h3>
+                            <ul class="list-disc list-inside text-muted space-y-2">
+                                <li>由k线为基础，k线的对应结构。</li>
+                                <li>常用结构：<span class="text-white">吞噬，三连涨或跌，黄昏之星，希望之星</span>。</li>
+                                <li>其中<strong class="text-gold">吞噬+三连</strong>是我使用的最多的结构，称之为 <strong class="text-white">OB</strong>。</li>
+                            </ul>
+                        </div>
+                        <div class="ict-box">
+                            <h3 class="text-cyan font-bold mb-2">OB 的精确定义 (SMC)：</h3>
+                            <p class="text-sm text-muted">
+                                OB 不是那根大阳线，而是<strong class="text-white">“被吞噬的那根阴线”</strong>。<br>
+                                这是机构的成本区。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-panel border border-border rounded-xl p-6 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-6 pb-6 border-b border-border">
+                            <span class="text-gold font-bold text-sm w-24">1. 核心 OB</span>
+                            <svg width="250" height="80" viewBox="0 0 250 80">
+                                <rect x="0" y="30" width="10" height="20" fill="#FF0040" stroke="#fff" stroke-width="1"/>
+                                <text x="0" y="70" fill="#FF0040" font-size="8">被吞噬的K线</text>
+                                <rect x="15" y="10" width="10" height="60" fill="#00E396"/>
+                                <rect x="30" y="5" width="10" height="20" fill="#00E396"/>
+                                <text x="50" y="45" fill="#fff" font-size="10">吞噬+三连 (OB确认)</text>
+                                <rect x="0" y="30" width="200" height="20" fill="#FFD700" fill-opacity="0.2"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-6 pb-6 border-b border-border">
+                            <span class="text-cyan font-bold text-sm w-24">2. SFP 假突破</span>
+                            <svg width="250" height="80" viewBox="0 0 250 80">
+                                <line x1="0" y1="30" x2="100" y2="30" stroke="#555" stroke-dasharray="2"/>
+                                <text x="110" y="30" fill="#555" font-size="10">阻力位</text>
+                                <line x1="50" y1="10" x2="50" y2="50" stroke="#fff"/>
+                                <rect x="45" y="40" width="10" height="20" fill="#FF0040"/>
+                                <text x="70" y="45" fill="#fff" font-size="10">插针收回 (猎杀完成)</text>
+                            </svg>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-white font-bold text-sm w-24">3. 星线</span>
+                            <svg width="250" height="60" viewBox="0 0 250 60">
+                                <rect x="10" y="20" width="10" height="30" fill="#00E396"/>
+                                <rect x="25" y="10" width="10" height="10" fill="#fff"/>
+                                <rect x="40" y="20" width="10" height="30" fill="#FF0040"/>
+                                <text x="60" y="35" fill="#fff" font-size="10">黄昏之星 (反转)</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="step2" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>02</span> 关键开盘价 & 时间</div>
+                <div class="original-box rounded-xl">
+                    <h3 class="text-gold font-bold mb-4">原文关键点：</h3>
+                    <div class="grid md:grid-cols-2 gap-10">
+                        <ul class="space-y-4 text-sm text-muted">
+                            <li><strong class="text-white">周开 (WO)</strong>: 力量很大，周一开盘的大阳/大阴线是关键支撑阻力。</li>
+                            <li><strong class="text-white">日开 (DO)</strong>: 日内关键价位。</li>
+                            <li><strong class="text-white">4H 开</strong>: 搭配 15 分钟使用。</li>
+                        </ul>
+                        <ul class="space-y-4 text-sm text-muted border-l border-border pl-6">
+                            <li><span class="text-cyan font-bold">亚洲盘 (08-14)</span>: 积累/震荡。</li>
+                            <li><span class="text-white font-bold">伦敦盘 (15-20)</span>: 诱导/假突破。</li>
+                            <li><span class="text-gold font-bold">纽约盘 (21-24)</span>: 爆发/真实趋势。</li>
+                            <li class="text-down text-xs pt-1">注：纽约开盘 21:30 新闻最多，波动最大。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="step3" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>03</span> 市场结构法则</div>
+                <div class="original-box rounded-xl">
+                    <h3 class="text-gold font-bold mb-4">原文定义：</h3>
+                    <ul class="space-y-4 text-muted leading-relaxed">
+                        <li>
+                            <strong class="text-white">结构延续 (BOS)</strong>: 强趋势发生时，回调很小，不断突破前高，目标前方的流动性。
+                        </li>
+                        <li>
+                            <strong class="text-white">结构改变 (CHoCH)</strong>: 震荡区间中的假突破或者接跌破，这些都是强结构。
+                        </li>
+                        <li class="bg-black/20 p-3 border-l-2 border-up">
+                            <strong class="text-up">核心原则</strong>：无论是延续还是改变，等待<span class="text-white">回调到关键区间</span>，进场。
+                        </li>
                     </ul>
                 </div>
-            </div>
+            </section>
 
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
-                <div class="step-num">03</div>
-                <div class="h-1 w-10 bg-purple-500 mb-4"></div>
-                <h3 class="text-lg font-bold mb-2">市场结构 (MS)</h3>
-                <p class="text-xs text-sub mb-3 font-mono">STRUCTURE SHIFT</p>
-                <div class="text-sm text-gray-300 space-y-2">
-                    <p><span class="text-up font-bold">BOS (延续)</span>: 突破前高/前低，回调微弱，目标流动性。</p>
-                    <p><span class="text-primary font-bold">CHoCH (改变)</span>: 震荡中的假突破(Fakeout)或结构破坏。</p>
-                    <div class="mt-2 text-xs bg-red-900/20 text-down p-2 rounded border border-red-900/30">
-                        ⚠ 核心原则：无论延续还是改变，必须等待回调进场，严禁追单。
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
-                <div class="step-num">04</div>
-                <div class="h-1 w-10 bg-orange-500 mb-4"></div>
-                <h3 class="text-lg font-bold mb-2">关键区间 (POI)</h3>
-                <p class="text-xs text-sub mb-3 font-mono">INTEREST ZONES</p>
-                <ul class="text-sm space-y-2 text-gray-300">
-                    <li class="border-l-2 border-primary pl-3">
-                        <span class="text-white font-bold">OB 区间</span><br>
-                        <span class="text-xs text-sub">以前述"吞噬"K线画出的区域，回测此处胜率最高。</span>
-                    </li>
-                    <li class="border-l-2 border-blue-500 pl-3">
-                        <span class="text-white font-bold">FVG (失衡区)</span><br>
-                        <span class="text-xs text-sub">只取趋势 50% 位置以上的 FVG。</span>
-                    </li>
-                    <li class="border-l-2 border-pink-500 pl-3">
-                        <span class="text-white font-bold">Liquidity (流动性)</span><br>
-                        <span class="text-xs text-sub">价格总是向着止损盘移动(猎杀)。</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group md:col-span-2">
-                <div class="step-num">07</div>
-                <div class="h-1 w-10 bg-teal-500 mb-4"></div>
-                <h3 class="text-lg font-bold mb-2">斐波那契回测 (Fibonacci)</h3>
-                <p class="text-xs text-sub mb-3 font-mono">GOLDEN POCKET</p>
+            <section id="step4" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>04</span> 关键区间 (POI)</div>
                 
-                <div class="grid grid-cols-4 gap-2 text-center">
-                    <div class="bg-card p-3 rounded border border-border">
-                        <div class="text-sub text-xs">强趋势</div>
-                        <div class="text-up font-bold font-mono">0.382</div>
-                        <div class="text-[10px] text-sub mt-1">跌不破=极强</div>
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div class="original-box rounded-xl">
+                        <h3 class="text-gold font-bold mb-3">原文区间：</h3>
+                        <ul class="space-y-3 text-muted">
+                            <li><strong class="text-white">1. OB 区间</strong>: 趋势开始的吞噬作为OB。OB后面跟随三连，回测胜率更高。</li>
+                            <li><strong class="text-white">2. FVG</strong>: 只取用趋势 <span class="text-gold">50% 以上</span> 的 FVG。</li>
+                            <li><strong class="text-white">3. 流动性</strong>: 价格磁铁。</li>
+                        </ul>
                     </div>
-                    <div class="bg-card p-3 rounded border border-border">
-                        <div class="text-sub text-xs">均衡点</div>
-                        <div class="font-bold font-mono">0.500</div>
-                        <div class="text-[10px] text-sub mt-1">多空分界</div>
-                    </div>
-                    <div class="bg-card p-3 rounded border border-primary bg-primary/5">
-                        <div class="text-primary text-xs font-bold">OTE 甜点区</div>
-                        <div class="text-primary font-bold font-mono">0.618-0.79</div>
-                        <div class="text-[10px] text-sub mt-1">最佳开单位</div>
-                    </div>
-                    <div class="bg-card p-3 rounded border border-border">
-                        <div class="text-sub text-xs">假突破/陷阱</div>
-                        <div class="text-down font-bold font-mono">1.13</div>
-                        <div class="text-[10px] text-sub mt-1">猎杀止损</div>
+
+                    <div class="space-y-6">
+                        <div class="bg-panel border border-border rounded-xl p-4 flex items-center justify-between">
+                            <div class="text-sm text-cyan w-1/3">FVG 失衡区</div>
+                            <svg width="200" height="80" viewBox="0 0 200 80">
+                                <rect x="20" y="50" width="10" height="20" fill="#00E396"/>
+                                <rect x="40" y="20" width="10" height="50" fill="#00E396"/>
+                                <rect x="60" y="10" width="10" height="20" fill="#00E396"/>
+                                <rect x="30" y="30" width="40" height="20" fill="#00F0FF" fill-opacity="0.3"/>
+                                <text x="80" y="45" fill="#00F0FF" font-size="10">缺口 (FVG)</text>
+                            </svg>
+                        </div>
+                        
+                        <div class="bg-panel border border-border rounded-xl p-4 flex items-center justify-between">
+                            <div class="text-sm text-gold w-1/3">阻力变支撑 (Flip)</div>
+                            <svg width="200" height="80" viewBox="0 0 200 80">
+                                <line x1="0" y1="40" x2="200" y2="40" stroke="#fff" stroke-dasharray="2"/>
+                                <path d="M 20 70 L 60 40 L 100 70 L 140 10 L 180 40 L 200 20" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+                                <circle cx="180" cy="40" r="4" fill="#gold"/>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="glass-panel rounded-xl p-6 relative overflow-hidden group md:col-span-2">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="h-1 w-10 bg-gray-200 mb-4"></div>
-                        <h3 class="text-lg font-bold mb-2">执行：进场与风控</h3>
-                        <p class="text-xs text-sub mb-3 font-mono">EXECUTION & RISK</p>
+            <section id="step5" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>05/06</span> 进场与风控</div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="original-box rounded-xl">
+                        <h3 class="text-up font-bold mb-2">进场 (Entry)</h3>
+                        <p class="text-muted">我使用关键支持和阻力，OB，大流动性，斐波那契回测的 OTE 位置，目标位。</p>
                     </div>
-                    <div class="text-right">
-                        <div class="text-xs text-sub font-mono">Step</div>
-                        <div class="text-2xl font-bold font-mono text-sub">05/06/08</div>
+                    <div class="original-box rounded-xl">
+                        <h3 class="text-down font-bold mb-2">止损 (Stop Loss)</h3>
+                        <p class="text-muted">止损设置在关键区间的下方。</p>
                     </div>
                 </div>
+            </section>
 
-                <div class="grid grid-cols-3 gap-4 mt-2">
-                    <div>
-                        <div class="text-xs text-sub uppercase mb-1">Entry Signal</div>
-                        <div class="text-sm font-bold text-up">OB + OTE + 扫流动性</div>
+            <section id="step7" class="mb-24 scroll-mt-20">
+                <div class="section-title"><span>07</span> 斐波那契回测</div>
+                
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div class="original-box rounded-xl">
+                        <h3 class="text-gold font-bold mb-3">原文参数：</h3>
+                        <ul class="space-y-3 text-muted text-sm">
+                            <li class="flex justify-between border-b border-gray-800 pb-1">
+                                <strong class="text-down">0.382</strong>
+                                <span>强趋势支撑，跌不破=极强。</span>
+                            </li>
+                            <li class="flex justify-between border-b border-gray-800 pb-1">
+                                <strong class="text-white">0.5</strong>
+                                <span>均衡点，判断延续。</span>
+                            </li>
+                            <li class="flex justify-between border-b border-gray-800 pb-1 bg-gold/10 px-2 rounded">
+                                <strong class="text-gold">0.618 - 0.79</strong>
+                                <span>OTE 位置，深度回测，最佳进场。</span>
+                            </li>
+                            <li class="flex justify-between">
+                                <strong class="text-purple">1.113</strong>
+                                <span>假突破判断。</span>
+                            </li>
+                        </ul>
                     </div>
-                    <div>
-                        <div class="text-xs text-sub uppercase mb-1">Stop Loss</div>
-                        <div class="text-sm font-bold text-down">关键区间外侧</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-sub uppercase mb-1">Volume</div>
-                        <div class="text-sm font-bold text-white">必须爆量确认</div>
+                    
+                    <div class="bg-panel border border-border rounded-xl p-6 flex justify-center items-center">
+                        <svg width="300" height="200" viewBox="0 0 300 200">
+                            <line x1="50" y1="20" x2="50" y2="180" stroke="#555"/>
+                            <text x="40" y="20" fill="#fff" font-size="10">High</text>
+                            <text x="40" y="180" fill="#fff" font-size="10">Low</text>
+                            
+                            <line x1="50" y1="100" x2="250" y2="100" stroke="#fff" stroke-dasharray="2"/>
+                            <text x="260" y="105" fill="#fff" font-size="10">0.5</text>
+                            
+                            <rect x="50" y="118" width="200" height="40" fill="#FFD700" fill-opacity="0.2"/>
+                            <line x1="50" y1="118" x2="250" y2="118" stroke="#FFD700"/>
+                            <text x="260" y="122" fill="#FFD700" font-size="10">0.618</text>
+                            <line x1="50" y1="158" x2="250" y2="158" stroke="#FFD700"/>
+                            <text x="260" y="162" fill="#FFD700" font-size="10">0.79</text>
+                            
+                            <text x="150" y="145" fill="#FFD700" font-weight="bold" font-size="12">OTE 区域</text>
+                        </svg>
                     </div>
                 </div>
-                <div class="mt-4 pt-4 border-t border-border">
-                    <p class="text-xs text-sub">
-                        <span class="text-primary">★ 出场策略</span>: 分批止盈。到达目标 1 (前高/前低) 平仓 50%，剩余推保本，博弈趋势延续。
-                    </p>
+            </section>
+
+            <section id="step8" class="mb-32">
+                <div class="section-title"><span>08</span> 成交量 (Volume)</div>
+                <div class="original-box rounded-xl mb-6">
+                    <p class="text-xl text-white">成交量处于<span class="text-gold font-bold">爆量</span>，不是反转就是继续。</p>
                 </div>
-            </div>
-
-        </div>
-
-        <div class="mb-20">
-            <h2 class="text-2xl font-bold mb-6 flex items-center">
-                <span class="w-1 h-6 bg-primary mr-3"></span>
-                核心图解 (Visual Setup)
-            </h2>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="glass-panel p-4 rounded-xl">
-                    <div class="flex justify-between mb-4">
-                        <h4 class="font-bold text-white">Setup A: Bullish Order Block</h4>
-                        <span class="text-xs font-mono text-sub border border-border px-2 py-0.5 rounded">ENTRY MODEL</span>
-                    </div>
-                    <div class="w-full aspect-video bg-black rounded border border-border overflow-hidden relative">
-                        <img src="https://placehold.co/800x450/181a20/0ECB81?text=Image+1:+Bullish+Order+Block+(Engulfing)&font=roboto" 
-                             alt="Bullish Order Block" 
-                             class="w-full h-full object-cover opacity-90 hover:opacity-100 transition duration-500">
-                    </div>
-                    <p class="mt-3 text-sm text-sub">
-                        <span class="text-down font-bold">下跌趋势</span> -> <span class="text-up font-bold">大阳线吞噬</span> -> <span class="text-up font-bold">连续三根上涨</span>。回踩此区域 (OB) 进场。
-                    </p>
+                <div class="ict-box rounded-xl">
+                    <h3 class="text-cyan font-bold mb-2">VSA 补充：</h3>
+                    <ul class="text-sm text-muted space-y-2">
+                        <li><strong>停止量 (Stopping Vol)</strong>: 下跌末端巨量+长下影。</li>
+                        <li><strong>缩量回测 (No Supply)</strong>: 回踩 OB 时必须缩量。</li>
+                    </ul>
                 </div>
+            </section>
 
-                <div class="glass-panel p-4 rounded-xl">
-                    <div class="flex justify-between mb-4">
-                        <h4 class="font-bold text-white">Setup B: Fibonacci OTE</h4>
-                        <span class="text-xs font-mono text-sub border border-border px-2 py-0.5 rounded">CONFLUENCE</span>
-                    </div>
-                    <div class="w-full aspect-video bg-black rounded border border-border overflow-hidden relative">
-                         <img src="https://placehold.co/800x450/181a20/FCD535?text=Image+2:+Fibonacci+OTE+(0.618-0.79)&font=roboto" 
-                             alt="Fibonacci OTE" 
-                             class="w-full h-full object-cover opacity-90 hover:opacity-100 transition duration-500">
-                    </div>
-                    <p class="mt-3 text-sm text-sub">
-                        从<span class="text-white">Swing Low</span>拉到<span class="text-white">Swing High</span>。等待价格回调至 <span class="text-primary">0.618 - 0.79</span> 区域。
-                    </p>
-                </div>
-            </div>
-        </div>
+            <footer class="border-t border-border py-12 text-center text-xs font-mono text-muted">
+                <p class="text-white mb-2">JUNJUNNI-X TRADING SYSTEM COMPLETE</p>
+                <p>INSTITUTIONAL PRICE ACTION PROTOCOL</p>
+            </footer>
 
-    </main>
+        </main>
+    </div>
 
-    <footer class="border-t border-border bg-black py-8 text-center">
-        <p class="text-sub text-xs font-mono">
-            ALPHA CORE SYSTEM v1.0 <br>
-            <span class="opacity-50">Authorized Personnel Only</span>
-        </p>
-    </footer>
-
-    <script>
-        // 简单的时钟脚本
-        function updateTime() {
-            const now = new Date();
-            // 转换为 UTC+8
-            const utc8 = new Date(now.getTime() + (8 * 60 * 60 * 1000) + (now.getTimezoneOffset() * 60000));
-            document.getElementById('clock').innerText = utc8.toISOString().substr(11, 8);
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-    </script>
 </body>
 </html>
