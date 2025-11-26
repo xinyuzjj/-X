@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Trading System | Alpha Core</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #0b0e11; /* 币安/Bitget 深色背景 */
+            color: #e6e8ea;
+        }
+        .glass-card {
+            background: rgba(30, 35, 41, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: #0ecb81; /* 涨势绿 */
+            box-shadow: 0 10px 30px -10px rgba(14, 203, 129, 0.3);
+        }
+        .text-green { color: #0ecb81; }
+        .text-red { color: #f6465d; }
+        .text-yellow { color: #fcd535; }
+        
+        .step-number {
+            font-size: 4rem;
+            opacity: 0.1;
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            font-weight: bold;
+        }
+        
+        /* 霓虹分割线 */
+        .neon-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0ecb81, transparent);
+            margin: 3rem 0;
+            opacity: 0.5;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0b0e11',
+                        card: '#1e2329',
+                        up: '#0ecb81',
+                        down: '#f6465d'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased min-h-screen pb-20">
+
+    <nav class="w-full p-6 flex justify-between items-center border-b border-gray-800 bg-opacity-50 fixed top-0 z-50 backdrop-blur-md">
+        <div class="text-xl font-bold tracking-tighter">
+            <span class="text-green">///</span> TRADING <span class="text-gray-500">SYSTEM</span>
+        </div>
+        <div class="text-xs text-gray-400 px-3 py-1 rounded-full border border-green-900 bg-green-900 bg-opacity-20 text-green">
+            ● SYSTEM ACTIVE
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 pt-32 pb-12 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+            SMC & Price Action
+        </h1>
+        <p class="text-gray-400 max-w-2xl mx-auto text-sm md:text-base">
+            基于流动性获取、市场结构破坏与斐波那契数列的高盈亏比量化策略。
+        </p>
+    </div>
+
+    <div class="neon-divider"></div>
+
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">01</div>
+            <h3 class="text-xl font-bold text-green mb-3">K线结构</h3>
+            <p class="text-sm text-gray-400 mb-2">基础形态识别</p>
+            <ul class="text-sm space-y-2">
+                <li>✅ <span class="text-white">OB (吞噬+三连)</span>: 核心反转信号</li>
+                <li>✅ 吞噬形态 (Engulfing)</li>
+                <li>✅ 黄昏/希望之星</li>
+            </ul>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">02</div>
+            <h3 class="text-xl font-bold text-yellow mb-3">关键时间</h3>
+            <p class="text-sm text-gray-400 mb-2">Time & Price</p>
+            <ul class="text-sm space-y-2">
+                <li>🕒 <span class="text-white">纽约 (21:00-24:00)</span>: 核心波动</li>
+                <li>🕒 伦敦 (15:00-20:00): 诱多空</li>
+                <li>🔑 关注: 周开 / 日开 / 4H开</li>
+            </ul>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">03</div>
+            <h3 class="text-xl font-bold text-blue-400 mb-3">市场结构</h3>
+            <p class="text-sm text-gray-400 mb-2">BOS & CHoCH</p>
+            <div class="text-sm text-gray-300">
+                无论是<span class="text-white">延续 (BOS)</span> 还是 <span class="text-white">改变 (CHoCH)</span>，都要等待回调。强趋势中回调很小，震荡中寻找假突破。
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">04</div>
+            <h3 class="text-xl font-bold text-purple-400 mb-3">关键区间</h3>
+            <p class="text-sm text-gray-400 mb-2">Support & Resistance</p>
+            <ul class="text-sm space-y-2">
+                <li class="border-l-2 border-green-500 pl-2">OB (Order Block)</li>
+                <li class="border-l-2 border-blue-500 pl-2">FVG (只取趋势50%以上)</li>
+                <li class="border-l-2 border-red-500 pl-2">流动性 (Liquidity Pool)</li>
+            </ul>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">05</div>
+            <h3 class="text-xl font-bold text-up mb-3">进出场</h3>
+            <p class="text-sm text-gray-400 mb-2">Entry & Exit</p>
+            <div class="space-y-3 text-sm">
+                <div>
+                    <span class="text-xs text-gray-500 uppercase">Entry</span><br>
+                    回踩 OB + OTE + 扫流动性
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 uppercase">Exit</span><br>
+                    反向 OB 或 下一个流动性池
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden">
+            <div class="step-number">06</div>
+            <h3 class="text-xl font-bold text-down mb-3">止损风控</h3>
+            <p class="text-sm text-gray-400 mb-2">Stop Loss</p>
+            <div class="text-sm text-white bg-red-900 bg-opacity-20 p-3 rounded border border-red-900">
+                🛑 必须设置在关键区间 (OB/FVG) 的外部。宁可被打止损，绝不扛单。
+            </div>
+        </div>
+        
+        <div class="glass-card p-6 rounded-xl relative overflow-hidden md:col-span-2">
+            <div class="step-number">07</div>
+            <h3 class="text-xl font-bold text-yellow mb-3">斐波那契回测 (Fibonacci)</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-800 bg-opacity-50 p-2 rounded">
+                    <span class="text-blue-400 font-bold">0.382</span>
+                    <p class="text-xs text-gray-400">强趋势支撑，跌不破代表极强</p>
+                </div>
+                <div class="bg-gray-800 bg-opacity-50 p-2 rounded border border-yellow-600">
+                    <span class="text-yellow-400 font-bold">0.618 - 0.79 (OTE)</span>
+                    <p class="text-xs text-gray-400">最佳入场位，深度回测区</p>
+                </div>
+                <div class="bg-gray-800 bg-opacity-50 p-2 rounded">
+                    <span class="text-gray-400 font-bold">0.5</span>
+                    <p class="text-xs text-gray-400">均衡点，判断延续性</p>
+                </div>
+                <div class="bg-gray-800 bg-opacity-50 p-2 rounded">
+                    <span class="text-red-400 font-bold">1.113</span>
+                    <p class="text-xs text-gray-400">假突破判断 (Shark Fin)</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="neon-divider"></div>
+
+    <div class="container mx-auto px-4 mb-16">
+        <h2 class="text-2xl font-bold mb-6 flex items-center">
+            <span class="w-2 h-6 bg-green-500 mr-3"></span> 
+            核心结构示意图
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card p-4 rounded-xl">
+                <div class="text-xs text-gray-400 mb-2">Setup 01</div>
+                <h4 class="font-bold mb-4">OB + Structure Shift</h4>
+                <div class="w-full h-64 bg-gray-800 rounded flex items-center justify-center border border-dashed border-gray-600">
+                    <img src="chart_ob.png" alt="OB Chart" class="max-h-full opacity-80 hover:opacity-100 transition-opacity" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=text-gray-500>请上传 chart_ob.png</span>'">
+                </div>
+            </div>
+            <div class="glass-card p-4 rounded-xl">
+                <div class="text-xs text-gray-400 mb-2">Setup 02</div>
+                <h4 class="font-bold mb-4">Fibonacci OTE Entry</h4>
+                <div class="w-full h-64 bg-gray-800 rounded flex items-center justify-center border border-dashed border-gray-600">
+                    <img src="chart_fib.png" alt="Fib Chart" class="max-h-full opacity-80 hover:opacity-100 transition-opacity" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=text-gray-500>请上传 chart_fib.png</span>'">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 mb-20">
+        <h2 class="text-2xl font-bold mb-6 flex items-center">
+            <span class="w-2 h-6 bg-blue-500 mr-3"></span> 
+            逻辑执行流 (Logic Flow)
+        </h2>
+        <div class="glass-card p-8 rounded-xl overflow-x-auto">
+            <div class="mermaid">
+                graph TD
+                    A[Start: 扫描市场] --> B{趋势结构分析};
+                    B -- 强趋势上涨 --> C[等待回调 0.382 / FVG];
+                    B -- 震荡或反转 --> D[等待回调 OTE 0.618-0.79];
+                    
+                    C --> E{触及关键区?};
+                    D --> E;
+                    
+                    E -- No --> F[观望 Wait];
+                    E -- Yes --> G{成交量爆量?};
+                    
+                    G -- Yes --> H{出现 OB (吞噬+三连)?};
+                    H -- Yes --> I[🚀 进场 LONG/SHORT];
+                    
+                    I --> J[止损: 结构外];
+                    I --> K[止盈: 下一个流动性池];
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-gray-600 text-sm py-8 border-t border-gray-800">
+        <p>System v1.0 | Built for GitHub Pages</p>
+    </footer>
+
+    <script>
+        // 初始化 Mermaid 流程图
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#0ecb81',
+                edgeLabelBackground: '#1e2329',
+                tertiaryColor: '#1e2329'
+            }
+        });
+    </script>
+</body>
+</html>
